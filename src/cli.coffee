@@ -38,10 +38,11 @@ module.exports = fibrous (argv) ->
 
     for semver, oldMetadata of fromVersions
       semver = from.ver
+      oldMetadata = from.ver
       unless semver in versionsToSync
         console.log "#{moduleName}@#{semver} already exists on destination"
         continue
-
+      
       {dist} = oldMetadata
 
       # clone the metadata skipping private properties and 'dist'
