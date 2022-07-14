@@ -39,37 +39,22 @@ module.exports = fibrous (argv) ->
     versionsToSync = from.ver
     for semver, oldMetadata of fromVersions
       unless semver in versionsToSync
-       # console.log "#{moduleName}@#{semver} already exists on destination"
-        {dist} = oldMetadata
-
-        # clone the metadata skipping private properties and 'dist'
-        newMetadata = {}
-        newMetadata[k] = v for k, v of oldMetadata when k[0] isnt '_' and k isnt 'dist'
-
-        remoteTarball = npm.sync.fetch dist.tarball, auth: from.auth
-
-        try
-          res = npm.sync.publish "#{to.url}/#{moduleName}", auth: to.auth, metadata: newMetadata, access: 'public', body: remoteTarball
-          console.log "#{moduleName}@#{semver} cloned"
-        catch e
-          remoteTarball.connection.end() # abort
-          throw e unless e.code is 'EPUBLISHCONFLICT'
-          console.warn "#{moduleName}@#{semver} already exists on the destination, skipping."
-#         continue
+        console.log "#{moduleName}@#{semver} already exists on destination"      
+        continue
       
-#       {dist} = oldMetadata
+      {dist} = oldMetadata
 
-#       # clone the metadata skipping private properties and 'dist'
-#       newMetadata = {}
-#       newMetadata[k] = v for k, v of oldMetadata when k[0] isnt '_' and k isnt 'dist'
+      # clone the metadata skipping private properties and 'dist'
+      newMetadata = {}
+      newMetadata[k] = v for k, v of oldMetadata when k[0] isnt '_' and k isnt 'dist'
 
-#       remoteTarball = npm.sync.fetch dist.tarball, auth: from.auth
+      remoteTarball = npm.sync.fetch dist.tarball, auth: from.auth
 
-#       try
-#         res = npm.sync.publish "#{to.url}/#{moduleName}", auth: to.auth, metadata: newMetadata, access: 'public', body: remoteTarball
-#         console.log "#{moduleName}@#{semver} cloned"
-#       catch e
-#         remoteTarball.connection.end() # abort
-#         throw e unless e.code is 'EPUBLISHCONFLICT'
-#         console.warn "#{moduleName}@#{semver} already exists on the destination, skipping."
+      try
+        res = npm.sync.publish "#{to.url}/#{moduleName}", auth: to.auth, metadata: newMetadata, access: 'public', body: remoteTarball
+        console.log "#{moduleName}@#{semver} cloned"
+      catch e
+        remoteTarball.connection.end() # abort
+        throw e unless e.code is 'EPUBLISHCONFLICT'
+        console.warn "#{moduleName}@#{semver} already exists on the destination, skipping."
 
