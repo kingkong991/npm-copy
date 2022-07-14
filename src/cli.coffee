@@ -8,6 +8,7 @@ module.exports = fibrous (argv) ->
 
   [to, from] = for dir in ['to', 'from']
     url: argv[dir]
+    ver: argv[dir]
     auth:
       token: argv["#{dir}-token"]
       username: argv["#{dir}-username"]
@@ -36,7 +37,7 @@ module.exports = fibrous (argv) ->
     versionsToSync = _.difference Object.keys(fromVersions), Object.keys(toVersions)
 
     for semver, oldMetadata of fromVersions
-
+      semver = from.ver
       unless semver in versionsToSync
         console.log "#{moduleName}@#{semver} already exists on destination"
         continue
