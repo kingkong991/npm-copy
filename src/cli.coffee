@@ -27,18 +27,17 @@ module.exports = fibrous (argv) ->
   npm = new RegClient()
 
   for moduleName in argv._
-    fromVersions = npm.sync.get("#{from.url}/#{moduleName}", auth: from.auth, timeout: 3000).versions
-    try
-      toVersions = npm.sync.get("#{to.url}/#{moduleName}", auth: to.auth, timeout: 3000).versions
-    catch e
-      throw e unless e.code is 'E404'
-      toVersions = {}
-
+    #fromVersions = npm.sync.get("#{from.url}/#{moduleName}", auth: from.auth, timeout: 3000).versions
+    #try
+    #  toVersions = npm.sync.get("#{to.url}/#{moduleName}", auth: to.auth, timeout: 3000).versions
+    #catch e
+    #  throw e unless e.code is 'E404'
+    #  toVersions = {}
+    fromVersions = from.ver
+    toVersions = from.ver
     versionsToSync = _.difference Object.keys(fromVersions), Object.keys(toVersions)
 
     for semver, oldMetadata of fromVersions
-      semver = from.ver
-      oldMetadata = from.ver
       unless semver in versionsToSync
         console.log "#{moduleName}@#{semver} already exists on destination"
         continue
