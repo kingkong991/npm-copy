@@ -17,13 +17,13 @@ module.exports = fibrous (argv) ->
       alwaysAuth: true
 
   moduleNames = argv._
-
+  
   unless from.url and (from.auth.token or (from.auth.username and from.auth.password)) and
          to.url and (to.auth.token or (to.auth.username and to.auth.password)) and
          moduleNames.length
     console.log 'usage: npm-copy --from <repository url> --from-token <token> --to <repository url> --to-token <token> moduleA [moduleB...]'
     return
-
+  console.log "#{from.ver} ver to sync" 
   npm = new RegClient()
 
   for moduleName in argv._
@@ -35,8 +35,8 @@ module.exports = fibrous (argv) ->
       toVersions = {}
     #fromVersions = from.ver
     #toVersions = from.ver
-    #versionsToSync = _.difference Object.keys(fromVersions), Object.keys(toVersions)
-    versionsToSync = from.ver
+    versionsToSync = _.difference Object.keys(fromVersions), Object.keys(toVersions)
+#     versionsToSync = from.ver
     for semver, oldMetadata of fromVersions
       unless semver in versionsToSync
         console.log "#{moduleName}@#{semver} already exists on destination"      
