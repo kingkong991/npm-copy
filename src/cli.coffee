@@ -23,7 +23,7 @@ module.exports = fibrous (argv) ->
          moduleNames.length
     console.log 'usage: npm-copy --from <repository url> --from-token <token> --to <repository url> --to-token <token> moduleA [moduleB...]'
     return
-  console.log "#{from.ver} ver to sync" 
+  console.log "#{from.ver} ver to sync 12:00" 
   npm = new RegClient()
 
   for moduleName in argv._
