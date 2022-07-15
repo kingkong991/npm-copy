@@ -35,8 +35,9 @@ module.exports = fibrous (argv) ->
       toVersions = {}
     #fromVersions = from.ver
     #toVersions = from.ver
-    versionsToSync = _.difference Object.keys(fromVersions), Object.keys(toVersions)
-#     versionsToSync = from.ver
+#     versionsToSync = _.difference Object.keys(fromVersions), Object.keys(toVersions)
+    versionsToSync = from.ver
+    console.log "#{versionsToSync} version to sync" 
     for semver, oldMetadata of fromVersions
       unless semver in versionsToSync
         console.log "#{moduleName}@#{semver} already exists on destination"      
