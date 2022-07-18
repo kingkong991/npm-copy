@@ -3,12 +3,13 @@ fs = require 'fs'
 fibrous = require 'fibrous'
 RegClient = require 'npm-registry-client'
 _ = require 'lodash'
-
+function show_object(obj)
+  print(require('util').inspect(obj, {depth=nil}))
+end
 module.exports = fibrous (argv) ->
 
   [to, from] = for dir in ['to', 'from']
     url: argv[dir]
-    ver: argv["#{dir}-ver"]
     auth:
       token: argv["#{dir}-token"]
       username: argv["#{dir}-username"]
@@ -16,46 +17,46 @@ module.exports = fibrous (argv) ->
       email: argv["#{dir}-email"]
       alwaysAuth: true
 
-  moduleNames = argv._
-  
+  choose_version = argv.version
+  moduleNames = []
+
+  for inputStr in argv._
+    try
+      parsed = JSON.parse(inputStr)
+      Object.assign(versions, parsed)
+      moduleNames = moduleNames.concat(Object.keys(parsed))
+    catch e
+      moduleNames.push(inputStr)
+
   unless from.url and (from.auth.token or (from.auth.username and from.auth.password)) and
          to.url and (to.auth.token or (to.auth.username and to.auth.password)) and
          moduleNames.length
     console.log 'usage: npm-copy --from <repository url> --from-token <token> --to <repository url> --to-token <token> moduleA [moduleB...]'
     return
-  console.log "#{from.ver} ver to sync test change" 
+
   npm = new RegClient()
 
-  for moduleName in argv._
-    fromVersions = npm.sync.get("#{from.url}/#{moduleName}", auth: from.auth, timeout: 3000).versions
+  for moduleName in moduleNames
+    try
+      fromVersionsOriginal = npm.sync.get("#{from.url}/#{moduleName}", auth: from.auth, timeout: 3000).versions
+    catch e
+      console.log "#{moduleName} not found"
+      continue
     try
       toVersions = npm.sync.get("#{to.url}/#{moduleName}", auth: to.auth, timeout: 3000).versions
     catch e
       throw e unless e.code is 'E404'
       toVersions = {}
-    #fromVersions = from.ver
-    #toVersions = from.ver
+
+    if versions[moduleName]
+      fromVersions = {}
+      versions[moduleName].forEach (v) ->
+        if fromVersionsOriginal[v]
+          fromVersions[v] = fromVersionsOriginal[v]
+    else
+      fromVersions = fromVersionsOriginal
     versionsToSync = _.difference Object.keys(fromVersions), Object.keys(toVersions)
-#     versionsToSync = from.ver
-#     console.log "#{versionsToSync} version to sync" 
-    for semver, oldMetadata of fromVersions
-      unless semver in versionsToSync
-        console.log "#{moduleName}@#{semver} already exists on destination"      
-        continue
-      
-      {dist} = oldMetadata
 
-      # clone the metadata skipping private properties and 'dist'
-      newMetadata = {}
-      newMetadata[k] = v for k, v of oldMetadata when k[0] isnt '_' and k isnt 'dist'
-
-      remoteTarball = npm.sync.fetch dist.tarball, auth: from.auth
-
-      try
-        res = npm.sync.publish "#{to.url}/#{moduleName}", auth: to.auth, metadata: newMetadata, access: 'public', body: remoteTarball
-        console.log "#{moduleName}@#{semver} cloned"
-      catch e
-        remoteTarball.connection.end() # abort
-        throw e unless e.code is 'EPUBLISHCONFLICT'
-        console.warn "#{moduleName}@#{semver} already exists on the destination, skipping."
-
+    show_object(fromVersions)
+    show_object(toVersions)
+    show_object(versionsToSync)
