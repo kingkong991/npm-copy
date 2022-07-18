@@ -59,6 +59,6 @@ module.exports = fibrous (argv) ->
             remoteTarball.connection.end() # abort
             throw e unless e.code is 'EPUBLISHCONFLICT'
             console.warn "#{moduleName}@#{semver} already exists on the destination, skipping."
-            
-      console.log "#{moduleName}@#{semver} already exists on destination"
         continue
+      console.log "#{moduleName}@#{semver} already exists on destination"
+       
