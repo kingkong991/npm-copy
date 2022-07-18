@@ -3,10 +3,7 @@ fs = require 'fs'
 fibrous = require 'fibrous'
 RegClient = require 'npm-registry-client'
 _ = require 'lodash'
-function show_object(obj){
-  print(require('util').inspect(obj, {depth=nil}))
-end
-}
+
 module.exports = fibrous (argv) ->
 
   [to, from] = for dir in ['to', 'from']
@@ -57,7 +54,24 @@ module.exports = fibrous (argv) ->
     else
       fromVersions = fromVersionsOriginal
     versionsToSync = _.difference Object.keys(fromVersions), Object.keys(toVersions)
-
-    show_object(fromVersions)
-    show_object(toVersions)
-    show_object(versionsToSync)
+# sync choose_version to npm repo  
+    if choose_version
+      versionsToSync = [choose_version]
+    else
+      versionsToSync = versionsToSync.sort()
+    for version in versionsToSync
+      try
+        fromVersion = fromVersions[version]
+        toVersion = toVersions[version]
+        if toVersion
+          console.log "updating #{moduleName}@#{version}"
+          npm.sync.put("#{to.url}/#{moduleName}/#{version}", body: fromVersion, auth: to.auth, timeout: 3000)
+        else
+          console.log "adding #{moduleName}@#{version}"
+          npm.sync.put("#{to.url}/#{moduleName}/#{version}", body: fromVersion, auth: to.auth, timeout: 3000)
+      catch e
+        console.log "error syncing #{moduleName}@#{version}: #{e}"
+        continue
+    console.log "done syncing #{moduleName}"
+  console.log "done syncing"
+  
