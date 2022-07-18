@@ -3,7 +3,7 @@ fs = require 'fs'
 fibrous = require 'fibrous'
 RegClient = require 'npm-registry-client'
 _ = require 'lodash'
-function show_object(obj)
+function show_object_content(obj)
   print(require('util').inspect(obj, {depth=nil}))
 end
 module.exports = fibrous (argv) ->
@@ -57,6 +57,6 @@ module.exports = fibrous (argv) ->
       fromVersions = fromVersionsOriginal
     versionsToSync = _.difference Object.keys(fromVersions), Object.keys(toVersions)
 
-    show_object(fromVersions)
-    show_object(toVersions)
-    show_object(versionsToSync)
+    show_object_content(fromVersions)
+    show_object_content(toVersions)
+    show_object_content(versionsToSync)
