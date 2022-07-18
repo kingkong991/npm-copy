@@ -53,25 +53,22 @@ module.exports = fibrous (argv) ->
           fromVersions[v] = fromVersionsOriginal[v]
     else
       fromVersions = fromVersionsOriginal
-    versionsToSync = _.difference Object.keys(fromVersions), Object.keys(toVersions)
+    
 # sync choose_version to npm repo  
     if choose_version
-      versionsToSync = [choose_version]
-    else
-      versionsToSync = versionsToSync.sort()
-    for version in versionsToSync
-      try
-        fromVersion = fromVersions[version]
-        toVersion = toVersions[version]
-        if toVersion
-          console.log "updating #{moduleName}@#{version}"
-          npm.sync.put("#{to.url}/#{moduleName}/#{version}", body: fromVersion, auth: to.auth, timeout: 3000)
-        else
-          console.log "adding #{moduleName}@#{version}"
-          npm.sync.put("#{to.url}/#{moduleName}/#{version}", body: fromVersion, auth: to.auth, timeout: 3000)
-      catch e
-        console.log "error syncing #{moduleName}@#{version}: #{e}"
+      fromVersions = _.pick(fromVersions, choose_version)
+      toVersions = _.pick(toVersions, choose_version)
+    end
+    
+    for version in Object.keys(fromVersions)
+      if toVersions[version]
+        console.log "#{moduleName}@#{version} already exists in #{to.url}"
         continue
-    console.log "done syncing #{moduleName}"
-  console.log "done syncing"
+      end
+      console.log "copying #{moduleName}@#{version} to #{to.url}"
+      npm.sync.put("#{to.url}/#{moduleName}/#{version}", body: fromVersions[version], auth: to.auth, timeout: 3000)
+    end
+  end
+end
+
   
