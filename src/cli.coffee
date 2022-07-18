@@ -14,7 +14,7 @@ module.exports = fibrous (argv) ->
       password: argv["#{dir}-password"]
       email: argv["#{dir}-email"]
       alwaysAuth: true
-
+  pick_version = argv.version
   moduleNames = argv._
 
   unless from.url and (from.auth.token or (from.auth.username and from.auth.password)) and
@@ -34,6 +34,8 @@ module.exports = fibrous (argv) ->
       toVersions = {}
 
     versionsToSync = _.difference Object.keys(fromVersions), Object.keys(toVersions)
+    #show type off vars
+    console.log moduleName, fromVersions, toVersions, versionsToSync
 
     for semver, oldMetadata of fromVersions
 
@@ -56,4 +58,3 @@ module.exports = fibrous (argv) ->
         remoteTarball.connection.end() # abort
         throw e unless e.code is 'EPUBLISHCONFLICT'
         console.warn "#{moduleName}@#{semver} already exists on the destination, skipping."
-
