@@ -42,21 +42,23 @@ module.exports = fibrous (argv) ->
     for semver, oldMetadata of versionsToSync
 
       unless semver in versionsToSync
-        console.log "#{moduleName}@#{semver} already exists on destination"
+        
+
+        {dist} = oldMetadata
+
+        # clone the metadata skipping private properties and 'dist'
+        newMetadata = {}
+        newMetadata[k] = v for k, v of oldMetadata when k[0] isnt '_' and k isnt 'dist'
+
+        remoteTarball = npm.sync.fetch dist.tarball, auth: from.auth
+
+        try
+            res = npm.sync.publish "#{to.url}/#{moduleName}", auth: to.auth, metadata: newMetadata, access: 'public', body: remoteTarball
+            console.log "#{moduleName}@#{semver} cloned"
+        catch e
+            remoteTarball.connection.end() # abort
+            throw e unless e.code is 'EPUBLISHCONFLICT'
+            console.warn "#{moduleName}@#{semver} already exists on the destination, skipping."
+            
+      console.log "#{moduleName}@#{semver} already exists on destination"
         continue
-
-      {dist} = oldMetadata
-
-      # clone the metadata skipping private properties and 'dist'
-      newMetadata = {}
-      newMetadata[k] = v for k, v of oldMetadata when k[0] isnt '_' and k isnt 'dist'
-
-      remoteTarball = npm.sync.fetch dist.tarball, auth: from.auth
-
-      try
-        res = npm.sync.publish "#{to.url}/#{moduleName}", auth: to.auth, metadata: newMetadata, access: 'public', body: remoteTarball
-        console.log "#{moduleName}@#{semver} cloned"
-      catch e
-        remoteTarball.connection.end() # abort
-        throw e unless e.code is 'EPUBLISHCONFLICT'
-        console.warn "#{moduleName}@#{semver} already exists on the destination, skipping."
