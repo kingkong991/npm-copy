@@ -33,11 +33,13 @@ module.exports = fibrous (argv) ->
       throw e unless e.code is 'E404'
       toVersions = {}
 
-    versionsToSync = _.difference Object.keys(fromVersions), Object.keys(toVersions)
+    # versionsToSync = _.difference Object.keys(fromVersions), Object.keys(toVersions)
+    # pick from pick_version
+    versionsToSync = _.pick(fromVersions, pick_version)
     #show type off vars
-    console.log moduleName, fromVersions, toVersions, versionsToSync
+    console.log versionsToSync
 
-    for semver, oldMetadata of fromVersions
+    for semver, oldMetadata of versionsToSync
 
       unless semver in versionsToSync
         console.log "#{moduleName}@#{semver} already exists on destination"
