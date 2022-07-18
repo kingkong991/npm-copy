@@ -15,7 +15,8 @@ module.exports = fibrous (argv) ->
       email: argv["#{dir}-email"]
       alwaysAuth: true
 
-  choose_version = argv.version
+
+  choose_versions = argv.version
   moduleNames = []
 
   for inputStr in argv._
@@ -53,6 +54,6 @@ module.exports = fibrous (argv) ->
           fromVersions[v] = fromVersionsOriginal[v]
     else
       fromVersions = fromVersionsOriginal
-    
-# show vars types
-    console.log [from, to, moduleName, fromVersions, toVersions]
+
+    #show vars types
+    console.log moduleName, fromVersions, toVersions 
